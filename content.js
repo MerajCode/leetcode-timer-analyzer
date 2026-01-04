@@ -127,7 +127,6 @@
 
   /* ───────────────────────────── START TIMER ───────────────────────────── */
   function startLiveTimer() {
-    savedOnce = false;
     const el = getOrCreateTimerUI();
     const t = el.querySelector("#lc-time");
     const a = el.querySelector("#lc-action");
@@ -206,8 +205,8 @@
       if (result && result.textContent.includes("Accepted")) {
         const submitted_at = getSubmissionTimestamp();
         //Check valid Submission or not
-        if (!submitted_at) return;
-        const title = (document.title.split("-").pop().join("-") || "").trim();
+        if (!submitted_at || !controller.isNewSubmission(submitted_at)) return;
+        const title = (document.title.split("-")[0] || "").trim();
         const link = location.href;
         const diffEl = document.querySelector("div[class*='text-difficulty']");
         const difficulty = diffEl
@@ -219,7 +218,7 @@
           title,
           submitted_at
         );
-        if (valid) return;
+        if (!valid) return;
 
         controller.storeSubmission({ title, link, difficulty, submitted_at });
         resetTimer();
@@ -228,7 +227,10 @@
       }
     });
 
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.querySelector("#qd-content"), {
+      childList: true,
+      subtree: true,
+    });
   }
 
   observeAccepted();

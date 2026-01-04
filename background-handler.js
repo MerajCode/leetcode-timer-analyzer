@@ -94,6 +94,7 @@ class Handler {
 
   /* ───────────── ICON ───────────── */
   updateIcon() {
+    if (!this.state.activeTabId) return;
     chrome.action.setIcon({
       path: this.state.timerActive
         ? "icons/running.png"

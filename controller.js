@@ -55,25 +55,22 @@ class Controller {
   }
 
   async isSubmissionAvailable(title, timestamp) {
-    //is Old submission
-    if (!this.isWithinOneMinute(timestamp)) return true;
-
-    //is already in my db
     const data = await new Promise((resolve) => {
       chrome.storage.local.get({ leetcodeLogs: [] }, resolve);
     });
 
-    return data.leetcodeLogs.some(
+    const exists = data.leetcodeLogs.some(
       (item) => item.title === title && item.submitted_at === timestamp
     );
+
+    return !exists;
   }
 
-  isWithinOneMinute(timeStr) {
-    const pastTs = new Date(timeStr).getTime();
-    const nowTs = Date.now();
-
-    const diff = Math.abs(nowTs - pastTs);
-    return diff <= 60 * 1000; // 1 minute
+  isNewSubmission(timeStr) {
+    const ts = new Date(timeStr).getTime();
+    if (Number.isNaN(ts)) return false;
+    console.log(ts, Math.abs(Date.now() - ts)<= 60 * 1000)
+    return Math.abs(Date.now() - ts) <= 15 * 1000;
   }
 }
 
