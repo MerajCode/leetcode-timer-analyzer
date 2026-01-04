@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "LeetCode Timer",
+  "version": "1.0.0",
+  "description": "Track time spent on LeetCode problems automatically. This extension logs problem details, difficulty, and time taken to help you analyze and improve your coding practice.",
+  "icons": {
+    "16": "icons/initial.png",
+    "48": "icons/initial.png",
+    "128": "icons/initial.png"
+  },
+  "permissions": [
+    "storage",
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://leetcode.com/*",
+    "https://leetcode-cn.com/*",
+    "https://leetcode.cn/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/initial.png",
+      "48": "icons/initial.png",
+      "128": "icons/initial.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://leetcode.com/problems/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "type": "module"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "controller.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}
