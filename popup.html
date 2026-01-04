@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LeetCode Timer Logger</title>
+    <style>
+      :root {
+        --bg-color: #f8fafc;
+        --card-bg: #ffffff;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --accent-color: #3b82f6; /* Blue */
+        --danger-color: #ef4444; /* Red */
+
+        /* LeetCode Difficulty Colors */
+        --easy-color: #00b8a3;
+        --medium-color: #ffc01e;
+        --hard-color: #ff375f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        width: 380px; /* Extension width */
+        height: auto;
+        min-height: 400px;
+      }
+
+      /* Header & Timer Section */
+      header {
+        background: var(--card-bg);
+        padding: 16px 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      /* Live Timer Styled as a Badge/Card */
+      .timer-container {
+        margin-top: 12px;
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
+        color: var(--accent-color);
+        padding: 10px;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+      }
+
+      .timer-container.active {
+        background: #fff7ed;
+        border-color: #ffedd5;
+        color: #ea580c;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.2);
+        }
+        70% {
+          box-shadow: 0 0 0 6px rgba(234, 88, 12, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(234, 88, 12, 0);
+        }
+      }
+
+      /* Main Content Area */
+      .container {
+        padding: 16px 20px;
+      }
+
+      /* Stats Grid */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 16px; /* Thoda gap kam kiya taaki settings fit ho */
+      }
+
+      .stat-card {
+        background: var(--card-bg);
+        padding: 10px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+        border: 1px solid #f1f5f9;
+      }
+
+      .stat-value {
+        font-size: 18px;
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .stat-label {
+        font-size: 11px;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      /* Colors for stats */
+      .stat-easy .stat-value {
+        color: var(--easy-color);
+      }
+      .stat-medium .stat-value {
+        color: var(--medium-color);
+      }
+      .stat-hard .stat-value {
+        color: var(--hard-color);
+      }
+
+      /* --- NEW: Target Settings Section --- */
+      .settings-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+        border: 1px solid #f1f5f9;
+      }
+
+      .settings-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .settings-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+
+      .btn-save {
+        background: var(--accent-color);
+        color: white;
+        border: none;
+        padding: 4px 12px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .btn-save:hover {
+        background: #2563eb;
+      }
+
+      .inputs-row {
+        display: flex;
+        gap: 10px;
+      }
+
+      .input-group {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .input-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .label-easy {
+        color: var(--easy-color);
+      }
+      .label-medium {
+        color: var(--medium-color);
+      }
+      .label-hard {
+        color: var(--hard-color);
+      }
+
+      .time-input {
+        width: 100%;
+        padding: 6px;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 13px;
+        text-align: center;
+        font-weight: 600;
+        color: var(--text-primary);
+        background: #f8fafc;
+      }
+
+      .time-input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        background: white;
+      }
+
+      /* Remove arrows from number input */
+      .time-input::-webkit-outer-spin-button,
+      .time-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      /* --- End Settings Section --- */
+
+      /* Recent List */
+      .section-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .list-container {
+        background: var(--card-bg);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        max-height: 200px; /* Thoda height kam kiya taaki scroll na aaye unnecessarily */
+        overflow-y: auto;
+        border: 1px solid #f1f5f9;
+      }
+
+      /* Scrollbar styling */
+      .list-container::-webkit-scrollbar {
+        width: 6px;
+      }
+      .list-container::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .list-container::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 10px;
+      }
+
+      .problem-item {
+        padding: 12px 16px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background 0.2s;
+      }
+
+      .problem-item:last-child {
+        border-bottom: none;
+      }
+
+      .problem-item:hover {
+        background-color: #f8fafc;
+      }
+
+      .prob-info {
+        display: flex;
+        flex:auto;
+        flex-direction: column;
+        gap: 2px;
+        max-width: 70%;
+      }
+
+      .prob-name {
+        font-weight: 500;
+        font-size: 13px;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .prob-meta {
+        font-size: 11px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .badge {
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 10px;
+      }
+
+      .badge.Easy {
+        background: #e6fffa;
+        color: var(--easy-color);
+      }
+      .badge.Medium {
+        background: #fffbeb;
+        color: var(--medium-color);
+      }
+      .badge.Hard {
+        background: #fff5f5;
+        color: var(--hard-color);
+      }
+
+      .time-val {
+        font-weight: 600;
+        font-size: 13px;
+        color: var(--text-primary);
+      }
+
+      /* Footer */
+      footer {
+        padding: 16px 20px;
+        text-align: center;
+        font-size: 12px;
+        color: var(--text-secondary);
+        border-top: 1px solid #e2e8f0;
+        background: var(--bg-color);
+        margin-top: auto;
+      }
+
+      .footer-links {
+        margin-bottom: 12px;
+      }
+
+      .footer-links a {
+        color: var(--accent-color);
+        text-decoration: none;
+        font-weight: 500;
+        margin: 0 4px;
+      }
+
+      .footer-links a:hover {
+        text-decoration: underline;
+      }
+
+      /* Delete Button */
+      .btn-danger {
+        background: transparent;
+        color: var(--danger-color);
+        border: 1px solid var(--danger-color);
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 11px;
+        font-weight: 600;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .btn-danger:hover {
+        background: #fef2f2;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h2>
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          style="color: #ffa116"
+        >
+          <path d="M12 2v4" />
+          <path d="m16.2 7.8 2.9-2.9" />
+          <path d="M18 12h4" />
+          <path d="m16.2 16.2 2.9 2.9" />
+          <path d="M12 18v4" />
+          <path d="m4.9 19.1 2.9-2.9" />
+          <path d="M2 12h4" />
+          <path d="m4.9 4.9 2.9 2.9" />
+        </svg>
+        LC Timer
+      </h2>
+      <div class="timer-container">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="12 6 12 12 16 14" />
+        </svg>
+        <span id="live-timer">No active problem</span>
+      </div>
+    </header>
+
+    <div class="container">
+      <!-- 1. Stats Row -->
+      <div class="stats-grid">
+        <div class="stat-card stat-easy">
+          <span id="avg-easy" class="stat-value">--</span>
+          <span class="stat-label">Easy Avg</span>
+        </div>
+        <div class="stat-card stat-medium">
+          <span id="avg-medium" class="stat-value">--</span>
+          <span class="stat-label">Med Avg</span>
+        </div>
+        <div class="stat-card stat-hard">
+          <span id="avg-hard" class="stat-value">--</span>
+          <span class="stat-label">Hard Avg</span>
+        </div>
+      </div>
+
+      <!-- 2. Target Settings (NEW SECTION) -->
+      <div class="settings-card">
+        <div class="settings-header">
+          <span class="settings-title">Reminder Time (mins)</span>
+          <button id="save-reminder-btn" class="btn-save">Save</button>
+        </div>
+        <div class="inputs-row">
+          <!-- Easy Input -->
+          <div class="input-group">
+            <label class="input-label label-easy">Easy</label>
+            <input
+              type="number"
+              id="target-easy"
+              class="time-input"
+              value="15"
+              min="1"
+            />
+          </div>
+          <!-- Medium Input -->
+          <div class="input-group">
+            <label class="input-label label-medium">Medium</label>
+            <input
+              type="number"
+              id="target-medium"
+              class="time-input"
+              value="30"
+              min="1"
+            />
+          </div>
+          <!-- Hard Input -->
+          <div class="input-group">
+            <label class="input-label label-hard">Hard</label>
+            <input
+              type="number"
+              id="target-hard"
+              class="time-input"
+              value="45"
+              min="1"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Recent Problems -->
+      <div class="section-title">
+        <span>Recent History</span>
+      </div>
+
+      <div class="list-container">
+        <div id="recent-list"></div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="footer-links">
+        <a href="https://github.com/merajcode" target="_blank"
+          >MerajCode - GitHub</a
+        >
+      </div>
+
+      <button id="detete-history-btn" class="btn-danger">
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M3 6h18" />
+          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+        </svg>
+        Reset Data
+      </button>
+    </footer>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
