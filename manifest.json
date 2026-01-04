@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "LeetCode Timer",
+  "name": "LeetCode Timer Analyzer",
   "version": "1.0.0",
   "description": "Track time spent on LeetCode problems automatically. This extension logs problem details, difficulty, and time taken to help you analyze and improve your coding practice.",
   "icons": {
